@@ -1,0 +1,65 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * everysize sync protocol: runs that transmitted something or failed, 31
+ * days. Filter all / ok / error, 50 rows per page.
+ *
+ * @var \Everysize\Checkout\Block\Adminhtml\Protocol $block
+ */
+?>
+<style>
+    .everysize-protocol .filters a { margin-right: 12px; }
+    .everysize-protocol .filters a.active { font-weight: bold; }
+    .everysize-protocol table { border-collapse: collapse; margin-top: 12px; width: 100%; max-width: 1000px; }
+    .everysize-protocol th, .everysize-protocol td { border-bottom: 1px solid #e3e3e3; padding: 6px 10px; text-align: left; vertical-align: top; }
+    .everysize-protocol th { background: #f5f5f5; }
+    .everysize-protocol td.state-ok { color: #008000; }
+    .everysize-protocol td.state-error { color: #e02b27; }
+    .everysize-protocol .message { white-space: pre-wrap; }
+    .everysize-protocol .pager { margin-top: 12px; }
+    .everysize-protocol .pager a { margin-right: 8px; }
+</style>
+
+<div class="everysize-protocol">
+    <p class="filters">
+        <a href="<?= $block->escapeUrl($block->filterUrl('all')) ?>"<?= $block->getFilter() === 'all' ? ' class="active"' : '' ?>><?= $block->escapeHtml((string) __('all')) ?></a>
+        <a href="<?= $block->escapeUrl($block->filterUrl('ok')) ?>"<?= $block->getFilter() === 'ok' ? ' class="active"' : '' ?>><?= $block->escapeHtml((string) __('ok')) ?></a>
+        <a href="<?= $block->escapeUrl($block->filterUrl('error')) ?>"<?= $block->getFilter() === 'error' ? ' class="active"' : '' ?>><?= $block->escapeHtml((string) __('error')) ?></a>
+    </p>
+
+    <?php $entries = $block->getEntries() ?>
+    <?php if ($entries === []): ?>
+        <p><?= $block->escapeHtml((string) __('No entries. Only runs that transmitted something or failed are logged (31 days).')) ?></p>
+    <?php else: ?>
+        <table>
+            <tr>
+                <th><?= $block->escapeHtml((string) __('Time')) ?></th>
+                <th><?= $block->escapeHtml((string) __('State')) ?></th>
+                <th><?= $block->escapeHtml((string) __('Run')) ?></th>
+                <th><?= $block->escapeHtml((string) __('Details')) ?></th>
+            </tr>
+            <?php foreach ($entries as $entry): ?>
+                <tr>
+                    <td><?= $block->escapeHtml($block->formatDateTime($entry['created_at'])) ?></td>
+                    <td class="state-<?= $entry['state'] === '1' ? 'ok' : 'error' ?>"><?= $block->escapeHtml((string) ($entry['state'] === '1' ? __('ok') : __('error'))) ?></td>
+                    <td><?= $block->escapeHtml($entry['title']) ?></td>
+                    <td class="message"><?= $block->escapeHtml($entry['message']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+        <?php $pages = $block->getPages() ?>
+        <?php if ($pages > 1): ?>
+            <p class="pager">
+                <?php for ($i = 0; $i < $pages; ++$i): ?>
+                    <?php if ($i === $block->getPage()): ?>
+                        <span><b><?= $i + 1 ?></b></span>
+                    <?php else: ?>
+                        <a href="<?= $block->escapeUrl($block->pageUrl($i)) ?>"><?= $i + 1 ?></a>
+                    <?php endif; ?>
+                <?php endfor; ?>
+            </p>
+        <?php endif; ?>
+    <?php endif; ?>
+</div>

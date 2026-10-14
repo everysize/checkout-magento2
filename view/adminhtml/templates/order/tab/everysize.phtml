@@ -1,0 +1,189 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Order view tab "everysize": order number, PayPal capture ID, original
+ * e-mail (information only), reports and refunds. Laid out like Magento's
+ * own "Information" tab: titled sections, two-column info tables and data
+ * grids, so it reads like the rest of the order view.
+ *
+ * @var \Everysize\Checkout\Block\Adminhtml\Order\Tab\Everysize $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+$link = $block->getLink();
+?>
+<style>
+    .everysize-tab .admin__page-section { margin-bottom: 3rem; }
+    .everysize-tab .everysize-hint { color: #666; font-size: 1.2rem; display: block; margin-top: .3rem; }
+    .everysize-tab .everysize-totals { display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .everysize-tab .everysize-total { border: 1px solid #e3e3e3; background: #f8f8f8; padding: 1rem 1.5rem; min-width: 16rem; }
+    .everysize-tab .everysize-total span { display: block; color: #666; font-size: 1.2rem; }
+    .everysize-tab .everysize-total strong { font-size: 2rem; }
+    .everysize-tab .everysize-total.is-open strong { color: #eb5202; }
+    .everysize-tab .everysize-refund-form { display: flex; align-items: flex-end; gap: 1rem; margin: 2rem 0 1rem; }
+    .everysize-tab .everysize-refund-form .admin__control-text { width: 14rem; }
+    .everysize-tab .data-grid { margin-bottom: 1rem; }
+    .everysize-tab .data-grid td.everysize-mono { font-family: monospace; color: #666; }
+    .everysize-tab .message { margin-top: 1rem; }
+    .everysize-tab .everysize-info th { width: 32rem; }
+    .everysize-tab .everysize-info td { text-align: left; }
+</style>
+<?php if ($link !== null): ?>
+    <div class="everysize-tab">
+
+        <section class="admin__page-section">
+            <div class="admin__page-section-title">
+                <span class="title"><?= $block->escapeHtml((string) __('everysize order')) ?></span>
+            </div>
+            <div class="admin__page-section-content">
+                <table class="admin__table-secondary everysize-info">
+                    <tbody>
+                    <tr>
+                        <th><?= $block->escapeHtml((string) __('everysize order number')) ?></th>
+                        <td><strong><?= $block->escapeHtml($link['everysize_order_id']) ?></strong></td>
+                    </tr>
+                    <tr>
+                        <th><?= $block->escapeHtml((string) __('Imported')) ?></th>
+                        <td><?= $block->escapeHtml($block->formatDateTime($link['created_at'])) ?></td>
+                    </tr>
+                    <tr>
+                        <th><?= $block->escapeHtml((string) __('Order number reported to everysize')) ?></th>
+                        <td><?= $block->escapeHtml($link['number_reported'] !== null ? $block->formatDateTime($link['number_reported']) : (string) __('not yet')) ?></td>
+                    </tr>
+                    <tr>
+                        <th><?= $block->escapeHtml((string) __('PayPal transaction (capture ID)')) ?></th>
+                        <td><?= $block->escapeHtml($link['paypal_capture_id'] !== '' ? $link['paypal_capture_id'] : '–') ?></td>
+                    </tr>
+                    <tr>
+                        <th><?= $block->escapeHtml((string) __('Customer\'s original e-mail')) ?></th>
+                        <td>
+                            <?= $block->escapeHtml($link['original_email'] !== '' ? $link['original_email'] : '–') ?>
+                            <span class="everysize-hint"><?= $block->escapeHtml((string) __('(for your information only — shop mails go to the order\'s everysize forwarding address)')) ?></span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <?php if ($link['paypal_capture_id'] !== ''): ?>
+            <?php $info = $block->getRefundInfo() ?>
+            <section class="admin__page-section">
+                <div class="admin__page-section-title">
+                    <span class="title"><?= $block->escapeHtml((string) __('Refund via everysize')) ?></span>
+                </div>
+                <div class="admin__page-section-content">
+                    <?php if ($info['error'] !== ''): ?>
+                        <div class="message message-warning">
+                            <?= $block->escapeHtml((string) __('Refunds could not be loaded:')) ?> <?= $block->escapeHtml($info['error']) ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="everysize-totals">
+                            <div class="everysize-total">
+                                <span><?= $block->escapeHtml((string) __('Paid')) ?></span>
+                                <strong><?= $block->escapeHtml($block->formatMoney($info['paid'])) ?></strong>
+                            </div>
+                            <div class="everysize-total">
+                                <span><?= $block->escapeHtml((string) __('refunded')) ?></span>
+                                <strong><?= $block->escapeHtml($block->formatMoney($info['refunded'])) ?></strong>
+                            </div>
+                            <div class="everysize-total<?= $info['open'] > 0.004 ? ' is-open' : '' ?>">
+                                <span><?= $block->escapeHtml((string) __('still open')) ?></span>
+                                <strong><?= $block->escapeHtml($block->formatMoney($info['open'])) ?></strong>
+                            </div>
+                        </div>
+
+                        <?php if ($info['refunds'] !== []): ?>
+                            <table class="data-grid">
+                                <thead>
+                                <tr>
+                                    <th class="data-grid-th"><?= $block->escapeHtml((string) __('Date')) ?></th>
+                                    <th class="data-grid-th"><?= $block->escapeHtml((string) __('Refunded amount')) ?></th>
+                                    <th class="data-grid-th"><?= $block->escapeHtml((string) __('Refund status')) ?></th>
+                                    <th class="data-grid-th"><?= $block->escapeHtml((string) __('Refund ID')) ?></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <?php foreach ($info['refunds'] as $refund): ?>
+                                    <tr>
+                                        <td><?= $block->escapeHtml($refund['created']) ?></td>
+                                        <td><?= $block->escapeHtml($refund['amount']) ?></td>
+                                        <td><?= $block->escapeHtml($refund['status']) ?></td>
+                                        <td class="everysize-mono"><?= $block->escapeHtml($refund['refundId']) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php if ($block->canRefund()): ?>
+                        <?php $confirm = (string) __('Refund %1 to the customer? This cannot be undone.'); ?>
+                        <form method="post" class="everysize-refund-form" action="<?= $block->escapeUrl($block->getRefundUrl()) ?>"
+                              onsubmit="return confirm(<?= /* @noEscape */ json_encode($confirm) ?>.replace('%1', this.refund_amount.value));">
+                            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                            <input type="hidden" name="order_id" value="<?= (int) $link['id_order'] ?>"/>
+                            <input type="hidden" name="refund_key" value="<?= $block->escapeHtmlAttr($block->getRefundKey()) ?>"/>
+                            <div class="admin__field">
+                                <label class="admin__field-label" for="everysize_refund_amount">
+                                    <span><?= $block->escapeHtml((string) __('Amount')) ?></span>
+                                </label>
+                                <div class="admin__field-control">
+                                    <input type="text" id="everysize_refund_amount" class="admin__control-text" name="refund_amount"
+                                           value="<?= $block->escapeHtmlAttr(number_format($info['open'], 2, ',', '')) ?>"/>
+                                </div>
+                            </div>
+                            <button type="submit" class="action-default primary">
+                                <span><?= $block->escapeHtml((string) __('Refund')) ?></span>
+                            </button>
+                        </form>
+                    <?php endif; ?>
+
+                    <div class="message message-notice">
+                        <?= $block->escapeHtml((string) __('Refund with a credit memo from the invoice (Invoices → open the invoice → Credit Memo → "Refund"): the amount goes back through everysize to the PayPal account the customer paid with. "Refund Offline" only books the credit memo, no money moves. This form refunds an amount without a credit memo.')) ?>
+                        <?php if ($block->isAutoRefundEnabled()): ?>
+                            <?= $block->escapeHtml((string) __('A cancellation before shipping without any refund is refunded automatically in full (setting under Sales → everysize Checkout).')) ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <section class="admin__page-section">
+            <div class="admin__page-section-title">
+                <span class="title"><?= $block->escapeHtml((string) __('Reports to everysize')) ?></span>
+            </div>
+            <div class="admin__page-section-content">
+                <?php $reports = $block->getReports() ?>
+                <?php if ($reports === []): ?>
+                    <p><?= $block->escapeHtml((string) __('None yet.')) ?></p>
+                <?php else: ?>
+                    <table class="data-grid">
+                        <thead>
+                        <tr>
+                            <th class="data-grid-th"><?= $block->escapeHtml((string) __('Time')) ?></th>
+                            <th class="data-grid-th"><?= $block->escapeHtml((string) __('Report type')) ?></th>
+                            <th class="data-grid-th"><?= $block->escapeHtml((string) __('Item / tracking code / refund')) ?></th>
+                            <th class="data-grid-th"><?= $block->escapeHtml((string) __('Reason / amount')) ?></th>
+                            <th class="data-grid-th"><?= $block->escapeHtml((string) __('Result')) ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($reports as $report): ?>
+                            <tr>
+                                <td><?= $block->escapeHtml($block->formatDateTime($report['created_at'])) ?></td>
+                                <td><?= $block->escapeHtml($block->reportKindLabel($report['kind'])) ?></td>
+                                <td><?= $block->escapeHtml($block->reportSkuLabel($report['kind'], $report['sku'])) ?></td>
+                                <td><?= $block->escapeHtml($report['kind'] === 'refund' && is_numeric($report['reason']) ? $block->formatMoney((float) $report['reason']) : ($report['reason'] !== '' ? $report['reason'] : '–')) ?></td>
+                                <td><?= $block->escapeHtml($block->reportResultLabel($report['result'])) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </div>
+        </section>
+
+    </div>
+<?php endif; ?>

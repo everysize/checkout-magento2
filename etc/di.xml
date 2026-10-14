@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!--
+  DI for the pure core: the database adapter behind ConnectionInterface.
+  Console commands and the orders-grid join are registered here too.
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Everysize\Checkout\Model\Db\ConnectionInterface" type="Everysize\Checkout\Model\Db\Connection"/>
+
+    <!-- The commands pull the Sync service via proxy: building its whole
+         graph (API client, exporters, importers) on every bin/magento call
+         would slow down every CLI command. The proxy sits on the constructor
+         ARGUMENT, not on the commands themselves: ImportCommand and
+         ExportCommand are virtual types, and Magento generates no proxy
+         classes for virtual types — a \Proxy entry there breaks every
+         bin/magento call ("Failed to load core Magento commands"). -->
+    <type name="Everysize\Checkout\Console\Command\SyncCommand">
+        <arguments>
+            <argument name="sync" xsi:type="object">Everysize\Checkout\Model\Sync\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="everysizeSync" xsi:type="object">Everysize\Checkout\Console\Command\SyncCommand</item>
+                <item name="everysizeOrderImport" xsi:type="object">Everysize\Checkout\Console\Command\ImportCommand</item>
+                <item name="everysizeOrderExport" xsi:type="object">Everysize\Checkout\Console\Command\ExportCommand</item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- everysize:order:import / everysize:order:export — one half of the sync each. -->
+    <virtualType name="Everysize\Checkout\Console\Command\ImportCommand" type="Everysize\Checkout\Console\Command\SyncCommand">
+        <arguments>
+            <argument name="mode" xsi:type="string">import</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Everysize\Checkout\Console\Command\ExportCommand" type="Everysize\Checkout\Console\Command\SyncCommand">
+        <arguments>
+            <argument name="mode" xsi:type="string">export</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- The orders grid gets the everysize order id as a column (filterable,
+         sortable): the grid synchronizer joins the link table per order. The
+         array arguments of the parent virtual type are merged by the DI. -->
+    <virtualType name="Everysize\Checkout\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Order\Grid">
+        <arguments>
+            <argument name="joins" xsi:type="array">
+                <item name="everysize_order" xsi:type="array">
+                    <item name="table" xsi:type="string">everysize_order</item>
+                    <item name="origin_column" xsi:type="string">entity_id</item>
+                    <item name="target_column" xsi:type="string">id_order</item>
+                </item>
+            </argument>
+            <argument name="columns" xsi:type="array">
+                <item name="everysize_order_id" xsi:type="string">everysize_order.everysize_order_id</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <preference for="Magento\Sales\Model\ResourceModel\Order\Grid" type="Everysize\Checkout\Model\ResourceModel\Order\Grid"/>
+</config>

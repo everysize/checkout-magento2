@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Sales::sales">
+                    <resource id="Everysize_Checkout::everysize" translate="title" sortOrder="60" title="everysize Checkout">
+                        <resource id="Everysize_Checkout::settings" translate="title" sortOrder="10" title="everysize Checkout Einstellungen"/>
+                        <resource id="Everysize_Checkout::order_tab" translate="title" sortOrder="20" title="Reiter everysize in Bestellungen"/>
+                        <resource id="Everysize_Checkout::refund" translate="title" sortOrder="30" title="Erstattungen über everysize auslösen"/>
+                        <resource id="Everysize_Checkout::protocol" translate="title" sortOrder="40" title="everysize Protokoll"/>
+                    </resource>
+                </resource>
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="Everysize_Checkout::system_config" translate="title" sortOrder="10" title="everysize Checkout Sektion"/>
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

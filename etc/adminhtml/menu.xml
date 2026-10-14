@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+  "everysize Checkout" under Sales: the configuration section and the sync
+  protocol. The settings entry points to the system config section (default
+  scope only), the protocol to the module's own page.
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Everysize_Checkout::everysize" title="everysize Checkout" translate="true" module="Everysize_Checkout"
+             parent="Magento_Sales::sales" sortOrder="60" resource="Everysize_Checkout::everysize"/>
+        <add id="Everysize_Checkout::menu_settings" title="Settings" translate="true" module="Everysize_Checkout"
+             parent="Everysize_Checkout::everysize"
+             action="adminhtml/system_config/edit/section/everysize_checkout" sortOrder="10"
+             resource="Everysize_Checkout::settings"/>
+        <add id="Everysize_Checkout::menu_protocol" title="Protocol" translate="true" module="Everysize_Checkout"
+             parent="Everysize_Checkout::everysize"
+             action="everysize/protocol/index" sortOrder="20"
+             resource="Everysize_Checkout::protocol"/>
+    </menu>
+</config>

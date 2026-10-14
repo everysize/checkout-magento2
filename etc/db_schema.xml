@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!--
+  everysize Checkout for Magento 2 — tables.
+
+  No foreign keys to sales_order: Magento can delete orders (or a merchant can
+  clean up) and a CASCADE must not take the "already reported" markers with it.
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="everysize_order" resource="default" engine="innodb" comment="everysize Checkout: Magento order to everysize order">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="id_order" unsigned="true" nullable="false" comment="sales_order.entity_id"/>
+        <column xsi:type="varchar" name="everysize_order_id" length="32" nullable="false" comment="everysize order ID"/>
+        <column xsi:type="varchar" name="paypal_capture_id" length="64" nullable="false" default="" comment="PayPal capture ID (payment.resourceId ?? transactionId)"/>
+        <column xsi:type="varchar" name="original_email" length="255" nullable="false" default="" comment="Original customer e-mail at everysize, information only"/>
+        <column xsi:type="datetime" name="number_reported" nullable="true" comment="Magento order number reported to everysize at"/>
+        <column xsi:type="datetime" name="created_at" nullable="false" comment="Row created at (UTC)"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="EVERYSIZE_ORDER_EVERYSIZE_ORDER_ID">
+            <column name="everysize_order_id"/>
+        </constraint>
+        <index referenceId="EVERYSIZE_ORDER_ID_ORDER" indexType="btree">
+            <column name="id_order"/>
+        </index>
+    </table>
+
+    <table name="everysize_order_item" resource="default" engine="innodb" comment="everysize Checkout: order items with the SKU everysize sent">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="id_order" unsigned="true" nullable="false" comment="sales_order.entity_id"/>
+        <column xsi:type="int" name="order_item_id" unsigned="true" nullable="false" comment="sales_order_item.item_id"/>
+        <column xsi:type="varchar" name="sku" length="255" nullable="false" comment="SKU exactly as everysize sent it"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="EVERYSIZE_ORDER_ITEM_ID_ORDER" indexType="btree">
+            <column name="id_order"/>
+        </index>
+        <index referenceId="EVERYSIZE_ORDER_ITEM_ORDER_ITEM_ID" indexType="btree">
+            <column name="order_item_id"/>
+        </index>
+        <index referenceId="EVERYSIZE_ORDER_ITEM_SKU" indexType="btree">
+            <column name="sku"/>
+        </index>
+    </table>
+
+    <table name="everysize_report" resource="default" engine="innodb" comment="everysize Checkout: what was reported to everysize, exactly once per (order, kind, sku)">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="id_order" unsigned="true" nullable="false" comment="sales_order.entity_id"/>
+        <column xsi:type="varchar" name="kind" length="16" nullable="false" comment="fulfillment | revocation | tracking | refund"/>
+        <column xsi:type="varchar" name="sku" length="255" nullable="false" default="" comment="SKU or tracking code or refundId / auto-decline"/>
+        <column xsi:type="varchar" name="reason" length="255" nullable="false" default="" comment="Reason or refund amount"/>
+        <column xsi:type="varchar" name="result" length="16" nullable="false" comment="sent | skipped | known"/>
+        <column xsi:type="datetime" name="created_at" nullable="false" comment="Reported at (UTC)"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="EVERYSIZE_REPORT_ONCE">
+            <column name="id_order"/>
+            <column name="kind"/>
+            <column name="sku"/>
+        </constraint>
+        <index referenceId="EVERYSIZE_REPORT_CREATED_AT" indexType="btree">
+            <column name="kind"/>
+            <column name="result"/>
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="everysize_protocol" resource="default" engine="innodb" comment="everysize Checkout: sync run protocol">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="title" length="255" nullable="false" comment="Title"/>
+        <column xsi:type="text" name="message" nullable="true" comment="Message"/>
+        <column xsi:type="boolean" name="state" nullable="false" default="1" comment="1 = ok, 0 = error"/>
+        <column xsi:type="datetime" name="created_at" nullable="false" comment="Logged at (UTC)"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="EVERYSIZE_PROTOCOL_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <!-- Orders grid: own column, filled by the di.xml join and directly at import. -->
+    <table name="sales_order_grid" resource="sales">
+        <column xsi:type="varchar" name="everysize_order_id" length="32" nullable="true" comment="everysize order ID"/>
+        <index referenceId="SALES_ORDER_GRID_EVERYSIZE_ORDER_ID" indexType="btree">
+            <column name="everysize_order_id"/>
+        </index>
+    </table>
+</schema>

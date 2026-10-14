@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+  everysize Checkout for Magento 2 — module declaration.
+  Sequence: everything the module touches (sales order + grid, quote for the
+  import, payment, shipping, configuration, backend area).
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="Everysize_Checkout" setup_version="1.0.0">
+        <sequence>
+            <module name="Magento_Sales"/>
+            <module name="Magento_Quote"/>
+            <module name="Magento_Payment"/>
+            <module name="Magento_Shipping"/>
+            <module name="Magento_Config"/>
+            <module name="Magento_Backend"/>
+        </sequence>
+    </module>
+</config>

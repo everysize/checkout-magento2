@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+  everysize Checkout for Magento 2 — the 5-minute sync. The job itself
+  checks "automatic sync" (Cron/Sync.php); bin/magento everysize:sync
+  works regardless of it.
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="everysize_checkout_sync" instance="Everysize\Checkout\Cron\Sync" method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+    </group>
+</config>

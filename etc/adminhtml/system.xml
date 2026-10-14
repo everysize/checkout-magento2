@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<!--
+  everysize Checkout configuration. Default scope only: one shop talks to one
+  everysize connection. The secret is stored encrypted and is never sent back
+  to the browser. Connection test, "remove credentials" and the environment
+  display come as own frontend models; the carrier field gets a datalist of
+  the documented carriers.
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="everysize" translate="label" sortOrder="400">
+            <label>everysize</label>
+        </tab>
+        <section id="everysize_checkout" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+            <label>everysize Checkout</label>
+            <tab>everysize</tab>
+            <resource>Everysize_Checkout::system_config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Credentials</label>
+                <field id="client_id" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Client ID</label>
+                    <comment>from everysize Business (Shop integration → Magento 2)</comment>
+                </field>
+                <field id="client_secret" translate="label comment" type="obscure" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Client Secret</label>
+                    <comment>stored encrypted; leave empty to keep the stored secret</comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="environment" translate="label" type="label" sortOrder="25" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>everysize environment</label>
+                    <frontend_model>Everysize\Checkout\Model\Config\Frontend\Environment</frontend_model>
+                </field>
+                <field id="test_connection" translate="label" type="label" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Connection test</label>
+                    <frontend_model>Everysize\Checkout\Model\Config\Frontend\TestConnectionButton</frontend_model>
+                </field>
+                <field id="remove_credentials" translate="label" type="label" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Remove credentials</label>
+                    <frontend_model>Everysize\Checkout\Model\Config\Frontend\RemoveCredentialsButton</frontend_model>
+                </field>
+            </group>
+            <group id="import" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Import</label>
+                <field id="store_id" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Store view for imported orders</label>
+                    <source_model>Everysize\Checkout\Model\Source\StoreView</source_model>
+                </field>
+                <field id="order_status" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Order status for new orders</label>
+                    <source_model>Everysize\Checkout\Model\Source\OrderStatus</source_model>
+                </field>
+                <field id="send_order_email" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Send order confirmation</label>
+                    <comment>Default no: the customer already received an order confirmation from everysize</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="export" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Reports to everysize</label>
+                <field id="carrier" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Shipping carrier</label>
+                    <comment>Required (max. 31 characters). Reported to everysize with the shipping; the 18 documented carriers are suggested</comment>
+                    <validate>required-entry validate-length maximum-length-31</validate>
+                    <frontend_model>Everysize\Checkout\Model\Config\Frontend\CarrierDatalist</frontend_model>
+                </field>
+            </group>
+            <group id="refund" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Refunds</label>
+                <field id="auto_refund_decline" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Refund cancellations before shipping automatically</label>
+                    <comment>Refunds the full amount through everysize after a reported cancellation before shipping. When switched on, older cancellations are never refunded</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <backend_model>Everysize\Checkout\Model\Config\Backend\AutoRefundSince</backend_model>
+                </field>
+            </group>
+            <group id="sync" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Synchronization</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Automatic synchronization</label>
+                    <comment>Import and reports every 5 minutes via cron. Requires a running Magento cron (cron:run); manually via CLI with "bin/magento everysize:sync"</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

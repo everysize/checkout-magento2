@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+  The "everysize" tab of the order view. The block decides itself (canShowTab)
+  whether the order came from the everysize checkout — others simply don't
+  get the tab.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="sales_order_tabs">
+            <block class="Everysize\Checkout\Block\Adminhtml\Order\Tab\Everysize" name="everysize_order_tab"
+                   template="Everysize_Checkout::order/tab/everysize.phtml"/>
+            <action method="addTab">
+                <argument name="name" xsi:type="string">everysize</argument>
+                <argument name="block" xsi:type="string">everysize_order_tab</argument>
+            </action>
+        </referenceBlock>
+    </body>
+</page>

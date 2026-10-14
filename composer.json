@@ -1,0 +1,33 @@
+{
+    "name": "everysize/checkout-magento2",
+    "description": "everysize Checkout for Magento 2: imports everysize orders and reports shipping, tracking, cancellations, returns and refunds back to everysize",
+    "type": "magento2-module",
+    "license": "MIT",
+    "version": "1.0.0",
+    "keywords": ["magento", "everysize", "checkout"],
+    "authors": [
+        {
+            "name": "everysize GmbH",
+            "homepage": "https://www.everysize.com"
+        }
+    ],
+    "homepage": "https://www.everysize.com",
+    "require": {
+        "php": ">=8.1",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "magento/framework": ">=103.0.4 <104.0.0",
+        "magento/module-backend": ">=102.0.4 <103.0.0",
+        "magento/module-config": ">=101.1.4 <102.0.0",
+        "magento/module-payment": ">=100.4.4 <101.0.0",
+        "magento/module-quote": ">=101.2.4 <102.0.0",
+        "magento/module-sales": ">=103.0.4 <104.0.0",
+        "magento/module-shipping": ">=100.4.4 <101.0.0"
+    },
+    "autoload": {
+        "files": ["registration.php"],
+        "psr-4": {
+            "Everysize\\Checkout\\": ""
+        }
+    }
+}

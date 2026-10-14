@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+  The orders grid gets the everysize order id as its own column: the di.xml
+  joins the link table into the grid, this adds the column + text filter.
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <listingToolbar name="listing_top"/>
+    <columns name="sales_order_columns">
+        <column name="everysize_order_id" sortOrder="15">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">everysize</label>
+            </settings>
+        </column>
+    </columns>
+</listing>

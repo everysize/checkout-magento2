@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!--
+  everysize Checkout for Magento 2 — defaults and the payment / shipping method.
+  The payment method is offline and not selectable anywhere (class flags);
+  imported orders carry it, and offline credit memos refund through it.
+  The shipping carrier exists so an imported order has a proper shipping
+  method; its price comes from the everysize order at import time and it is
+  never offered in the storefront (active=0 and Carrier::isAvailable false).
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <everysize>
+                <active>1</active>
+                <model>Everysize\Checkout\Model\Method\Everysize</model>
+                <title translate="title">everysize (PayPal)</title>
+                <order_status>processing</order_status>
+                <allowspecific>0</allowspecific>
+            </everysize>
+        </payment>
+        <carriers>
+            <everysize>
+                <active>0</active>
+                <model>Everysize\Checkout\Model\Carrier\Everysize</model>
+                <title>everysize</title>
+                <name>everysize</name>
+                <type>O</type>
+                <sallowspecific>0</sallowspecific>
+            </everysize>
+        </carriers>
+        <everysize_checkout>
+            <general>
+                <client_id/>
+                <client_secret/>
+            </general>
+            <import>
+                <store_id>0</store_id>
+                <order_status>processing</order_status>
+                <send_order_email>0</send_order_email>
+            </import>
+            <export>
+                <carrier>DHL</carrier>
+            </export>
+            <refund>
+                <auto_refund_decline>1</auto_refund_decline>
+                <auto_refund_since/>
+            </refund>
+            <sync>
+                <enabled>1</enabled>
+            </sync>
+        </everysize_checkout>
+    </default>
+</config>
